@@ -32,6 +32,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "3f6d657d-3c14-4d51-afb2-5e8f5b1cc112"
+      }
+    },
+    "owner": "kerlau.killian"
   }
 }

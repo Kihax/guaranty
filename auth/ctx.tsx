@@ -3,7 +3,7 @@ import { useStorageState } from "./useStorageState";
 import { useRouter, useFocusEffect } from "expo-router";
 
 const AuthContext = React.createContext<{
-	signIn: (email: any, password: any) => void;
+	signIn: (email: any, password: any) => Promise<Boolean>;
 	signUp: (email: any, fullName: any, password: any) => void;
 	signInWithGoogleReq: (accessToken: string) => void;
 	signOut: () => void;
@@ -11,7 +11,7 @@ const AuthContext = React.createContext<{
 	isLoading: boolean;
 	signInGoogleAfterPassword: (token: string, password: any) => void;
 }>({
-	signIn: (email: any, password: any) => null,
+	signIn: (email: any, password: any) => new Promise<Boolean>(() => {return false}),
 	signUp: (email: any, fullName: any, password: any) => null,
 	signInWithGoogleReq: (accessToken: string) => null,
 	signOut: () => null,
@@ -34,7 +34,7 @@ export function useSession() {
 	return value;
 }
 
-const URL_API = "https://192.168.1.14:3333/api/auth";
+const URL_API_AUTH = `${process.env.EXPO_PUBLIC_BASE_URL}/auth`;
 
 export function SessionProvider(props: React.PropsWithChildren) {
 	const [[isLoading, session], setSession] = useStorageState("session");
@@ -42,31 +42,40 @@ export function SessionProvider(props: React.PropsWithChildren) {
 
 	const signIn = async (email: any, password: any) => {
 		// Perform sign-in logic here
-		const response = await fetch(`${URL_API}/login`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				email: email.email.value,
-				password: password.password.value,
-			}),
-		});
-		const res = await response.json();
-		if (res?.token?.token) {
-			setSession(res.token.token);
-			router.replace("/");
-		} else {
-			email.setEmail({
-				value: email.email.value,
-				error: res?.errors[0]?.message || "",
+		console.log("sign in");
+		try {
+			const response = await fetch(`${URL_API_AUTH}/login`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					email: email,
+					password: password,
+				}),
 			});
+
+			if (response.ok) {
+				const res = await response.json();
+				console.log(res);
+				if (res?.token?.token) {
+					setSession(res.token.token);
+					router.replace("/");
+					return true;
+				}
+			} else {
+				console.error("Promise resolved but HTTP status failed");
+			}
+			return false;
+		} catch (e) {
+			console.log(e);
+			return false;
 		}
 	};
 
 	const signInGoogleAfterPassword = async (token: string, password: any) => {
 		const response = await fetch(
-			`http://192.168.1.14:3333/api/auth/googleSetPassword/${token}`,
+			`${URL_API_AUTH}/googleSetPassword/${token}`,
 			{
 				method: "POST",
 				headers: {
@@ -77,7 +86,7 @@ export function SessionProvider(props: React.PropsWithChildren) {
 				}),
 			}
 		);
-    console.log(password)
+		console.log(password);
 		const res = await response.json();
 		console.log(res);
 		if (res?.token?.token) {
@@ -93,12 +102,15 @@ export function SessionProvider(props: React.PropsWithChildren) {
 
 	const signInWithGoogleReq = async (accessToken: string) => {
 		// Perform sign-in logic here
-		const response = await fetch(`${URL_API}/login/google/${accessToken}`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-		});
+		const response = await fetch(
+			`${URL_API_AUTH}/login/google/${accessToken}`,
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+			}
+		);
 		const res = await response.json();
 		console.log(res);
 		if (res?.code == 10) {
@@ -111,7 +123,7 @@ export function SessionProvider(props: React.PropsWithChildren) {
 	};
 
 	const signUp = async (email: any, fullName: any, password: any) => {
-		const response = await fetch(`${URL_API}/register`, {
+		const response = await fetch(`${URL_API_AUTH}/register`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
