@@ -30,7 +30,7 @@ const GoogleButton = (props: any) => {
 						marginRight: 20
 					}}
 				>
-					Login with Google
+					{props?.title || "Continue with Google"}
 				</Text>
 			</TouchableOpacity>
 		</View>

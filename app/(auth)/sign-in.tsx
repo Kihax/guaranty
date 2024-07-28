@@ -40,9 +40,9 @@ export default function SignIn() {
 		});
 	};
 
-	const [email, setEmail] = useState("victor@gmail.com");
+	const [email, setEmail] = useState<String>("");
 
-	const [password, setPassword] = useState("motdepasse1234");
+	const [password, setPassword] = useState<String>("");
 
 	const [error, setError] = useState<any>();
 	const [userGoogleInfo, setUserGoogleInfo] = useState<any>();

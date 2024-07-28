@@ -19,7 +19,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.kerlau.killian.guaranty"
     },
     "web": {
       "bundler": "metro",
@@ -38,7 +39,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "3f6d657d-3c14-4d51-afb2-5e8f5b1cc112"
+        "projectId": "4e8a9d00-6139-47f3-9b49-fcdfa008b02b"
       }
     },
     "owner": "kerlau.killian"

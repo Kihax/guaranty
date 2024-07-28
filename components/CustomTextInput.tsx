@@ -4,7 +4,7 @@ import React from "react";
 
 const CustomTextInput = (props: any) => {
 	return (
-		<View>
+		<View style={props?.styleView}>
 			<Text aria-label={props?.label} nativeID={props?.label} style={styles.label}>
 				{props?.label || ""}
 			</Text>
@@ -12,7 +12,7 @@ const CustomTextInput = (props: any) => {
 				display: "flex",
 				position: "relative"
 			}}>
-				<TextInput aria-label="input"  aria-labelledby={props?.label} style={styles.input} placeholder={props?.label} {...props} />
+				<TextInput {...props} aria-label="input"  aria-labelledby={props?.label} style={[styles.input, props?.style]} placeholder={props?.label} />
 				<View style={{
 					position: "absolute",
 					display:"flex",
@@ -37,7 +37,8 @@ const styles = StyleSheet.create({
 		borderRadius: 10,
 		backgroundColor: "#f4f4f4",
 		padding: 10,
-		paddingRight: 40
+		paddingRight: 40,
+		width:  "100%"
 	},
 	errorText: {
 		color: "red",
