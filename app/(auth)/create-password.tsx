@@ -23,29 +23,11 @@ import CustomButton from "@/components/CustomButton";
 import Divider from "@/components/Divider";
 import GoogleButton from "@/components/GoogleButton";
 import { Link } from "expo-router";
-import {
-	GoogleSignin,
-	GoogleSigninButton,
-	statusCodes,
-} from "@react-native-google-signin/google-signin";
+import { useLocalSearchParams } from "expo-router";
 
-export default function SignIn() {
-	const configureGoogleSignIn = () => {
-		GoogleSignin.configure({
-			webClientId:
-				"760902025608-t4bm5brk18pr1rppgre8or8ddlt4lg73.apps.googleusercontent.com",
-			iosClientId:
-				"760902025608-sllt5hmnc3pf6svmdock93i401tt2llg.apps.googleusercontent.com",
-		});
-	};
-
-	useEffect(() => {
-		configureGoogleSignIn();
-	}, []);
-
-	const [userGoogleInfo, setUserGoogleInfo] = useState<any>();
-
-	const { session, isLoading, signIn, signInWithGoogleReq, signUp } = useSession();
+export default function createPassword() {
+	const { token } = useLocalSearchParams<{ token: string }>();
+	const { session, isLoading, signInGoogleAfterPassword } = useSession();
 	const [showPassword, setShowPassword] = useState<boolean>(false);
 	const [showConfirmPassword, setShowConfirmPassword] =
 		useState<boolean>(false);
@@ -55,21 +37,6 @@ export default function SignIn() {
 			return !showState;
 		});
 	};
-
-	const [firstName, setFirstName] = useState({
-		value: "",
-		error: "",
-	});
-
-	const [lastName, setLastName] = useState({
-		value: "",
-		error: "",
-	});
-
-	const [email, setEmail] = useState({
-		value: "",
-		error: "",
-	});
 
 	const [password, setPassword] = useState({
 		value: "",
@@ -81,59 +48,7 @@ export default function SignIn() {
 		error: "",
 	});
 
-	const signInWithGoogle = async () => {
-		console.log("pressed");
-
-		try {
-			await GoogleSignin.hasPlayServices();
-			const userInfo = await GoogleSignin.signIn();
-			setUserGoogleInfo(userInfo);
-			const tokenB = await GoogleSignin.getTokens();
-			const token = tokenB.accessToken;
-			await signInWithGoogleReq(token);
-		} catch (e) {}
-	};
-
 	const submitRegister = async () => {
-		if (!firstName.value.match(/^[\w-\. ]{3,64}$/g)) {
-			setFirstName({
-				value: firstName.value,
-				error: "Your firstname should only contains letters, numbers and be at least 3 chars and should not exceed 64 chars",
-			});
-		} else {
-			setFirstName({
-				value: firstName.value,
-				error: "",
-			});
-		}
-
-		if (!lastName.value.match(/^[\w-\. ]{3,64}$/g)) {
-			setLastName({
-				value: lastName.value,
-				error: "Your lastname should only contains letters, numbers and be at least 3 chars and should not exceed 64 chars",
-			});
-		} else {
-			setLastName({
-				value: lastName.value,
-				error: "",
-			});
-		}
-
-		if (
-			!email.value.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g) ||
-			email.value.length >= 64
-		) {
-			setEmail({
-				value: email.value,
-				error: "Please set a valid email",
-			});
-		} else {
-			setEmail({
-				value: email.value,
-				error: "",
-			});
-		}
-
 		if (
 			!password.value.match(
 				/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm
@@ -162,14 +77,17 @@ export default function SignIn() {
 			});
 		}
 
-		if (
-			firstName.error == "" &&
-			lastName.error == "" &&
-			email.error == "" &&
-			password.error == "" &&
-			confirmPassword.error == ""
-		) {
-			const r = await signUp(email.value, firstName.value, lastName.value, password.value)
+		if (password.error == "" && confirmPassword.error == "") {
+			const r = await signInGoogleAfterPassword(
+				token ? token : "",
+				password.value
+			);
+			if (r?.error) {
+				setPassword({
+					value: password.value,
+					error: "An error occured",
+				});
+			}
 		}
 	};
 
@@ -177,57 +95,8 @@ export default function SignIn() {
 
 	return (
 		<SafeAreaView style={styles.container}>
-			<Text style={styles.title}>Register</Text>
-			<View
-				style={{
-					display: "flex",
-					flexDirection: "row",
-				}}
-			>
-				<CustomTextInput
-					label="First name"
-					error={firstName.error}
-					styleView={{
-						flex: 1,
-						width: "100%",
-						paddingRight: 5,
-					}}
-					onChangeText={(text: string) => {
-						setFirstName({
-							value: text,
-							error: firstName?.error,
-						});
-					}}
-					value={firstName.value}
-				/>
-				<CustomTextInput
-					label="Last name"
-					error={lastName.error}
-					styleView={{
-						flex: 1,
-						width: "100%",
-						paddingLeft: 5,
-					}}
-					onChangeText={(text: string) => {
-						setLastName({
-							value: text,
-							error: lastName?.error,
-						});
-					}}
-					value={lastName.value}
-				/>
-			</View>
-			<CustomTextInput
-				label="Email"
-				error={email.error}
-				onChangeText={(text: string) => {
-					setEmail({
-						value: text,
-						error: email?.error,
-					});
-				}}
-				value={email.value}
-			/>
+			<Text style={styles.title}>Create password</Text>
+
 			<CustomTextInput
 				value={password.value}
 				label="Password"
@@ -284,22 +153,7 @@ export default function SignIn() {
 				error={confirmPassword?.error}
 			/>
 
-			<Text style={styles.noaccount}>
-				<Link href="sign-in">Does have an account ?</Link>
-			</Text>
-
 			<CustomButton onPress={submitRegister}>Register</CustomButton>
-
-			<Divider />
-
-			<GoogleButton
-				props={{
-					onPress: signInWithGoogle,
-				}}
-				style={{
-					marginTop: 10,
-				}}
-			/>
 		</SafeAreaView>
 	);
 }

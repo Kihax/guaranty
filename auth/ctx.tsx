@@ -3,21 +3,21 @@ import { useStorageState } from "./useStorageState";
 import { useRouter, useFocusEffect } from "expo-router";
 
 const AuthContext = React.createContext<{
-	signIn: (email: any, password: any) => Promise<Boolean>;
-	signUp: (email: any, fullName: any, password: any) => void;
+	signIn: (email: string, password: string) => Promise<Boolean>;
+	signUp: (email: string, firstname: string, lastname: string, password: string) => Promise<Boolean>;
 	signInWithGoogleReq: (accessToken: string) => void;
 	signOut: () => void;
 	session?: string | null;
 	isLoading: boolean;
-	signInGoogleAfterPassword: (token: string, password: any) => void;
+	signInGoogleAfterPassword: (token: string, password: any) => Promise<any>;
 }>({
 	signIn: (email: any, password: any) => new Promise<Boolean>(() => {return false}),
-	signUp: (email: any, fullName: any, password: any) => null,
+	signUp: (email: string, firstname: string, lastname: string, password: string) => new Promise<Boolean>(() => {return false}),
 	signInWithGoogleReq: (accessToken: string) => null,
 	signOut: () => null,
 	session: null,
 	isLoading: false,
-	signInGoogleAfterPassword: (token: string, password: any) => null,
+	signInGoogleAfterPassword: (token: string, password: any) => new Promise<any>(() => {return {}}),
 });
 
 // This hook can be used to access the user info.
@@ -55,12 +55,14 @@ export function SessionProvider(props: React.PropsWithChildren) {
 				}),
 			});
 
+			console.log(response)
+
 			if (response.ok) {
 				const res = await response.json();
 				console.log(res);
 				if (res?.token?.token) {
 					setSession(res.token.token);
-					router.replace("/");
+					router.replace("(app)/index");
 					return true;
 				}
 			} else {
@@ -73,7 +75,7 @@ export function SessionProvider(props: React.PropsWithChildren) {
 		}
 	};
 
-	const signInGoogleAfterPassword = async (token: string, password: any) => {
+	const signInGoogleAfterPassword = async (token: string, password: string) => {
 		const response = await fetch(
 			`${URL_API_AUTH}/googleSetPassword/${token}`,
 			{
@@ -82,21 +84,23 @@ export function SessionProvider(props: React.PropsWithChildren) {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
-					password: password?.password.value,
+					password: password,
 				}),
 			}
 		);
 		console.log(password);
 		const res = await response.json();
 		console.log(res);
-		if (res?.token?.token) {
+		if (res?.token) {
 			setSession(res.token.token);
-			router.replace("/");
+			router.replace("./(app)");
+			return {
+
+			}
 		} else {
-			password.setPassword({
-				value: password.password?.value,
-				error: res?.message || "erreur",
-			});
+			return {
+				error: "an error occured"
+			}
 		}
 	};
 
@@ -112,64 +116,55 @@ export function SessionProvider(props: React.PropsWithChildren) {
 			}
 		);
 		const res = await response.json();
-		console.log(res);
-		if (res?.code == 10) {
-			router.replace(`create-password?token=${res?.token}`);
+		console.log(res)
+		if (res?.code == 2) {
+			router.replace({
+				pathname: "create-password",
+				params: {
+					token: res?.token
+				}
+			});
 		}
-		if (res?.token?.token) {
-			setSession(res.token.token);
+		if (res?.token) {
+			setSession(res.token);
 			router.replace("/");
 		}
 	};
 
-	const signUp = async (email: any, fullName: any, password: any) => {
+	const signUp = async (email: string, firstname: string, lastname: string, password: string) => {
 		const response = await fetch(`${URL_API_AUTH}/register`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
-				email: email.email.value,
-				fullName: fullName.fullName.value,
-				password: password.password.value,
+				email,
+				firstname,
+				lastname,
+				password,
 			}),
 		});
+		console.log(response)
 		const res = await response.json();
+		console.log(res)
 		if (res?.error) {
-			for (let i = 0; i < res.error.len; i++) {
-				if (res?.error[i]?.field == "password") {
-					password.setPassword({
-						value: password.password.value,
-						error: res?.errors[0]?.message || "",
-					});
-				} else if (res?.error[0]?.field == "email") {
-					email.setEmail({
-						value: email.email.value,
-						error: res?.errors[0]?.message || "",
-					});
-				} else if (res?.error[0]?.field == "fullName") {
-					fullName.setFullName({
-						value: fullName.fullName.value,
-						error: res?.errors[0]?.message || "",
-					});
-				}
-			}
+			return false
 		} else {
-			signIn(email, password);
+			await signIn(email, password);
 		}
-
+		return true
 		//await signIn(email, password)
 	};
 
 	return (
 		<AuthContext.Provider
 			value={{
-				signIn: signIn,
-				signUp: signUp,
+				signIn,
+				signUp,
 				signOut: () => {
 					setSession(null);
 				},
-				signInWithGoogleReq: signInWithGoogleReq,
+				signInWithGoogleReq,
 				session,
 				isLoading,
 				signInGoogleAfterPassword,

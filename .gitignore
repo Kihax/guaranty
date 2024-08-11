@@ -24,5 +24,6 @@ tmp/
 expo-env.d.ts
 # @end expo-cli
 
+*.apk
 
 .env

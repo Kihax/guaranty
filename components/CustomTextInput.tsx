@@ -3,6 +3,19 @@ import React from "react";
 
 
 const CustomTextInput = (props: any) => {
+	let dProps = {value: "", secureTextEntry: false, onChangeText: () => {}};
+	if(props?.value) {
+		dProps.value = props?.value
+	}
+
+	if(props?.secureTextEntry) {
+		dProps.secureTextEntry = props?.secureTextEntry
+	}
+
+	if(props?.onChangeText) {
+		dProps.onChangeText = props?.onChangeText
+	}
+	
 	return (
 		<View style={props?.styleView}>
 			<Text aria-label={props?.label} nativeID={props?.label} style={styles.label}>
@@ -12,7 +25,7 @@ const CustomTextInput = (props: any) => {
 				display: "flex",
 				position: "relative"
 			}}>
-				<TextInput {...props} aria-label="input"  aria-labelledby={props?.label} style={[styles.input, props?.style]} placeholder={props?.label} />
+				<TextInput {...dProps} aria-label="input"  aria-labelledby={props?.label} style={[styles.input, props?.style]} placeholder={props?.label} />
 				<View style={{
 					position: "absolute",
 					display:"flex",
@@ -20,7 +33,7 @@ const CustomTextInput = (props: any) => {
 					height: "100%",
 					justifyContent: "center",
 					zIndex: 1
-				}}>{props?.leftComponent}</View>
+				}}>{props?.children }</View>
 			</View>
 			{props?.error ? <Text style={styles.errorText}>{props?.error}</Text> : <></>}
 		</View>

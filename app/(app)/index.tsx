@@ -1,18 +1,13 @@
-import { Text, View } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native'
+import React from 'react'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { useSession } from '@/auth/ctx'
 
-import { useSession } from '../../auth/ctx';
-
-export default function Index() {
-  const { signOut } = useSession();
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text
-        onPress={() => {
-          // The `app/(app)/_layout.tsx` will redirect to the sign-in screen.
-          signOut();
-        }}>
-        Sign Out
-      </Text>
-    </View>
-  );
+export default function Main() {
+    const { session, isLoading, signOut } = useSession();
+    return (
+        <SafeAreaView>
+            <TouchableOpacity onPress={signOut}><Text>Logout</Text></TouchableOpacity>
+        </SafeAreaView>
+    )
 }

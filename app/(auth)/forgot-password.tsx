@@ -21,6 +21,8 @@ import {
 	statusCodes,
 } from "@react-native-google-signin/google-signin";
 
+const URL_API_AUTH = `${process.env.EXPO_PUBLIC_BASE_URL}/auth`;
+
 export default function SignIn() {
 	const configureGoogleSignIn = () => {
 		GoogleSignin.configure({
@@ -33,7 +35,7 @@ export default function SignIn() {
 
 	useEffect(() => {
 		configureGoogleSignIn();
-		console.log('config')
+		console.log("config");
 	}, []);
 
 	const { session, isLoading, signIn, signInWithGoogleReq } = useSession();
@@ -45,47 +47,31 @@ export default function SignIn() {
 		});
 	};
 
-	const [email, setEmail] = useState<string>("");
-
-	const [password, setPassword] = useState<string>("");
-
+	const [email, setEmail] = useState<String>("");
 	const [error, setError] = useState<any>();
-	const [userGoogleInfo, setUserGoogleInfo] = useState<any>();
+	const [message, setMessage] = useState<String>("");
 
-	const submitLogin = async () => {
+	const submitForgotPassword = async () => {
 		if (!email.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g)) {
 			return setError("Doesn't find any account for this email/password");
 		}
 
-		if (password.length < 8) {
-			return setError("Doesn't find any account for this email/password");
-		}
-
-		const valid = await signIn(email, password);
-
-		console.log("valid : ", valid);
-
-		if (!valid) {
-			console.log("not valid");
-			return setError("Doesn't find any account for this email/password");
-		}
-
-		return;
-	};
-
-	const signInWithGoogle = async () => {
-		console.log("pressed");
-		
-
-		try {
-			await GoogleSignin.hasPlayServices();
-			const userInfo = await GoogleSignin.signIn();
-			setUserGoogleInfo(userInfo);
-			const tokenB = await GoogleSignin.getTokens();
-			const token = tokenB.accessToken;
-			await signInWithGoogleReq(token);
-		} catch (e) {
-			setError(e);
+		const response = await fetch(`${URL_API_AUTH}/password/send`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				email: email,
+			}),
+		});
+		console.log(`${URL_API_AUTH}/password/send`)
+		if (response.ok) {
+			const res = await response.json();
+			console.log(res)
+			setMessage("You will receive an email soon, if your account exist")
+		} else {
+			console.error("Promise resolved but HTTP status failed");
 		}
 	};
 
@@ -94,7 +80,7 @@ export default function SignIn() {
 	return (
 		<SafeAreaView style={styles.screen}>
 			<View style={styles.container}>
-				<Text style={styles.title}>Login</Text>
+				<Text style={styles.title}>Forgot password</Text>
 				<CustomTextInput
 					label="Email"
 					error={error}
@@ -103,48 +89,10 @@ export default function SignIn() {
 					}}
 					value={email}
 				/>
-				<CustomTextInput
-					value={password}
-					label="Password"
-					secureTextEntry={!showPassword}
-					onChangeText={(text: string) => {
-						setPassword(text);
-					}}
-				>
-					<TouchableOpacity
-						onPress={() => {
-							setShowPassword(!showPassword);
-						}}
-					>
-						<Ionicons
-							name={
-								showPassword ? "eye-off-outline" : "eye-outline"
-							}
-							size={28}
-						/>
-					</TouchableOpacity>
-				</CustomTextInput>
 
-				<Text style={styles.forgot}>
-					<Link href="forgot-password">Forgot password ?</Link>
-				</Text>
+				<Text>{message}</Text>
 
-				<CustomButton onPress={submitLogin}>Login</CustomButton>
-
-				<Text style={styles.noaccount}>
-					<Link href="sign-up">Doesn't have an account ?</Link>
-				</Text>
-
-				<Divider />
-
-				<GoogleButton
-					props={{
-						onPress: signInWithGoogle
-					}}
-					style={{
-						marginTop: 10,
-					}}
-				/>
+				<CustomButton onPress={submitForgotPassword}>Send</CustomButton>
 			</View>
 		</SafeAreaView>
 	);

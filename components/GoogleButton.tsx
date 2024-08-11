@@ -6,7 +6,7 @@ const GoogleButton = (props: any) => {
 	return (
 		<View>
 			<TouchableOpacity
-				{...props}
+				{...props?.props}
 				style={{
 					borderWidth: 1,
 					padding: 15,
@@ -30,7 +30,7 @@ const GoogleButton = (props: any) => {
 						marginRight: 20
 					}}
 				>
-					{props?.title || "Continue with Google"}
+					{props?.props?.title || "Continue with Google"}
 				</Text>
 			</TouchableOpacity>
 		</View>
