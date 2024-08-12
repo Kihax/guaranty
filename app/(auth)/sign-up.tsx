@@ -82,8 +82,6 @@ export default function SignIn() {
 	});
 
 	const signInWithGoogle = async () => {
-		console.log("pressed");
-
 		try {
 			await GoogleSignin.hasPlayServices();
 			const userInfo = await GoogleSignin.signIn();

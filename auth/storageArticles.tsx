@@ -1,6 +1,14 @@
 import * as FileSystem from "expo-file-system";
 import * as Network from "expo-network";
 
+/**
+ * 
+ * constante
+ */
+const articlesDir = FileSystem.cacheDirectory + "items/";
+const articlesFile = articlesDir + "items";
+const URL_API_ITEMS = `${process.env.EXPO_PUBLIC_BASE_URL}/items`;
+
 async function ensureDirExists(dir: string) {
 	const dirInfo = await FileSystem.getInfoAsync(dir);
 	if (!dirInfo.exists) {
@@ -8,15 +16,12 @@ async function ensureDirExists(dir: string) {
 	}
 }
 
-const articlesDir = FileSystem.cacheDirectory + "articles/";
-const articlesFile = articlesDir + "articles";
-
 export async function updates(session: string | null) {
 	// met à jour le fichier et renvoie les articles
 	const netState = await Network.getNetworkStateAsync();
 	if (netState.isInternetReachable) {
 		const response = await fetch(
-			`https://192.168.1.14:3333/api/articles/get`,
+			`${URL_API_ITEMS}/get`,
 			{
 				method: "GET",
 				headers: {
@@ -53,6 +58,19 @@ export async function getArticles(session: string | null) {
 		return articles;
 	} else {
 		const articlesString = await FileSystem.readAsStringAsync(articlesFile);
-		return JSON.parse(articlesString);
+		if(articlesString) {
+			try {
+				const str = JSON.parse(articlesString);
+				if(str?.length > 0) {
+					return str
+				}
+				return []
+			} catch (e) {
+				return []
+			}
+			
+		}
+		
 	}
+	return []
 }

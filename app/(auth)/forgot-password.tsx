@@ -35,7 +35,6 @@ export default function SignIn() {
 
 	useEffect(() => {
 		configureGoogleSignIn();
-		console.log("config");
 	}, []);
 
 	const { session, isLoading, signIn, signInWithGoogleReq } = useSession();
@@ -65,10 +64,8 @@ export default function SignIn() {
 				email: email,
 			}),
 		});
-		console.log(`${URL_API_AUTH}/password/send`)
 		if (response.ok) {
 			const res = await response.json();
-			console.log(res)
 			setMessage("You will receive an email soon, if your account exist")
 		} else {
 			console.error("Promise resolved but HTTP status failed");

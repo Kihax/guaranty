@@ -5,6 +5,11 @@ import { useStorageState } from "@/auth/useStorageState";
 import { getNetworkStateAsync } from "expo-network";
 import { useAssets } from "expo-asset";
 
+/**
+ * constantes
+ */
+const URL_API_ITEMS = `${process.env.EXPO_PUBLIC_BASE_URL}/items`;
+
 // Checks if gif directory exists. If not, creates it
 async function ensureDirExists(dir: string) {
 	const dirInfo = await FileSystem.getInfoAsync(dir);
@@ -24,7 +29,7 @@ export default function ImageToken(props: any) {
 	const imageDir = FileSystem.cacheDirectory + type + "/";
 	const imageUri = imageDir + imageToken;
 	const imageUrl =
-		"https://192.168.1.14:3333/api/items/picture/" +
+		`${URL_API_ITEMS}/items` +
 		type +
 		"/" +
 		imageToken;
@@ -53,7 +58,7 @@ export default function ImageToken(props: any) {
 					})
 				).md5;
 				const response = await fetch(
-					`https://192.168.1.14:3333/api/items/picture/${type}/hash/${imageToken}`,
+					`${URL_API_ITEMS}/picture/${type}/hash/${imageToken}`,
 					{
 						method: "GET",
 						headers: {

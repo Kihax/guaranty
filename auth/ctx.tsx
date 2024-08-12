@@ -2,23 +2,47 @@ import React from "react";
 import { useStorageState } from "./useStorageState";
 import { useRouter, useFocusEffect } from "expo-router";
 
+/**
+ * Constante du fichier
+ */
+
 const AuthContext = React.createContext<{
 	signIn: (email: string, password: string) => Promise<Boolean>;
-	signUp: (email: string, firstname: string, lastname: string, password: string) => Promise<Boolean>;
+	signUp: (
+		email: string,
+		firstname: string,
+		lastname: string,
+		password: string
+	) => Promise<Boolean>;
 	signInWithGoogleReq: (accessToken: string) => void;
 	signOut: () => void;
 	session?: string | null;
 	isLoading: boolean;
 	signInGoogleAfterPassword: (token: string, password: any) => Promise<any>;
 }>({
-	signIn: (email: any, password: any) => new Promise<Boolean>(() => {return false}),
-	signUp: (email: string, firstname: string, lastname: string, password: string) => new Promise<Boolean>(() => {return false}),
+	signIn: (email: any, password: any) =>
+		new Promise<Boolean>(() => {
+			return false;
+		}),
+	signUp: (
+		email: string,
+		firstname: string,
+		lastname: string,
+		password: string
+	) =>
+		new Promise<Boolean>(() => {
+			return false;
+		}),
 	signInWithGoogleReq: (accessToken: string) => null,
 	signOut: () => null,
 	session: null,
 	isLoading: false,
-	signInGoogleAfterPassword: (token: string, password: any) => new Promise<any>(() => {return {}}),
+	signInGoogleAfterPassword: (token: string, password: any) =>
+		new Promise<any>(() => {
+			return {};
+		}),
 });
+const URL_API_AUTH = `${process.env.EXPO_PUBLIC_BASE_URL}/auth`;
 
 // This hook can be used to access the user info.
 export function useSession() {
@@ -34,15 +58,12 @@ export function useSession() {
 	return value;
 }
 
-const URL_API_AUTH = `${process.env.EXPO_PUBLIC_BASE_URL}/auth`;
-
 export function SessionProvider(props: React.PropsWithChildren) {
 	const [[isLoading, session], setSession] = useStorageState("session");
 	const router = useRouter();
 
 	const signIn = async (email: any, password: any) => {
 		// Perform sign-in logic here
-		console.log("sign in");
 		try {
 			const response = await fetch(`${URL_API_AUTH}/login`, {
 				method: "POST",
@@ -55,11 +76,8 @@ export function SessionProvider(props: React.PropsWithChildren) {
 				}),
 			});
 
-			console.log(response)
-
 			if (response.ok) {
 				const res = await response.json();
-				console.log(res);
 				if (res?.token?.token) {
 					setSession(res.token.token);
 					router.replace("(app)/index");
@@ -70,12 +88,14 @@ export function SessionProvider(props: React.PropsWithChildren) {
 			}
 			return false;
 		} catch (e) {
-			console.log(e);
 			return false;
 		}
 	};
 
-	const signInGoogleAfterPassword = async (token: string, password: string) => {
+	const signInGoogleAfterPassword = async (
+		token: string,
+		password: string
+	) => {
 		const response = await fetch(
 			`${URL_API_AUTH}/googleSetPassword/${token}`,
 			{
@@ -88,19 +108,15 @@ export function SessionProvider(props: React.PropsWithChildren) {
 				}),
 			}
 		);
-		console.log(password);
 		const res = await response.json();
-		console.log(res);
 		if (res?.token) {
 			setSession(res.token.token);
 			router.replace("./(app)");
-			return {
-
-			}
+			return {};
 		} else {
 			return {
-				error: "an error occured"
-			}
+				error: "an error occured",
+			};
 		}
 	};
 
@@ -116,22 +132,27 @@ export function SessionProvider(props: React.PropsWithChildren) {
 			}
 		);
 		const res = await response.json();
-		console.log(res)
-		if (res?.code == 2) {
-			router.replace({
-				pathname: "create-password",
-				params: {
-					token: res?.token
-				}
-			});
-		}
+		console.log("response : ", res)
 		if (res?.token) {
-			setSession(res.token);
-			router.replace("/");
+			if (res?.code == 2) {
+				return router.replace({
+					pathname: "create-password",
+					params: {
+						token: res?.token,
+					},
+				});
+			}
+			setSession(res?.token?.token);
+			return router.replace("/");
 		}
 	};
 
-	const signUp = async (email: string, firstname: string, lastname: string, password: string) => {
+	const signUp = async (
+		email: string,
+		firstname: string,
+		lastname: string,
+		password: string
+	) => {
 		const response = await fetch(`${URL_API_AUTH}/register`, {
 			method: "POST",
 			headers: {
@@ -144,15 +165,13 @@ export function SessionProvider(props: React.PropsWithChildren) {
 				password,
 			}),
 		});
-		console.log(response)
 		const res = await response.json();
-		console.log(res)
 		if (res?.error) {
-			return false
+			return false;
 		} else {
 			await signIn(email, password);
 		}
-		return true
+		return true;
 		//await signIn(email, password)
 	};
 

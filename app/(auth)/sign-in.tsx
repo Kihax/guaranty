@@ -33,7 +33,6 @@ export default function SignIn() {
 
 	useEffect(() => {
 		configureGoogleSignIn();
-		console.log('config')
 	}, []);
 
 	const { session, isLoading, signIn, signInWithGoogleReq } = useSession();
@@ -63,19 +62,14 @@ export default function SignIn() {
 
 		const valid = await signIn(email, password);
 
-		console.log("valid : ", valid);
-
 		if (!valid) {
-			console.log("not valid");
 			return setError("Doesn't find any account for this email/password");
 		}
 
 		return;
 	};
 
-	const signInWithGoogle = async () => {
-		console.log("pressed");
-		
+	const signInWithGoogle = async () => {		
 
 		try {
 			await GoogleSignin.hasPlayServices();
