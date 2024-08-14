@@ -28,12 +28,7 @@ export default function ImageToken(props: any) {
 	const type = props.type;
 	const imageDir = FileSystem.cacheDirectory + type + "/";
 	const imageUri = imageDir + imageToken;
-	const imageUrl =
-		`${URL_API_ITEMS}/items` +
-		type +
-		"/" +
-		imageToken;
-
+	const imageUrl = `${URL_API_ITEMS}/picture/` + type + "/" + imageToken;
 	const [uri, setUri] = useState<any>("");
 
 	let _props = props;
@@ -58,7 +53,7 @@ export default function ImageToken(props: any) {
 					})
 				).md5;
 				const response = await fetch(
-					`${URL_API_ITEMS}/picture/${type}/hash/${imageToken}`,
+					`${URL_API_ITEMS}/picture/${type}/verify/${imageToken}`,
 					{
 						method: "GET",
 						headers: {
@@ -67,17 +62,25 @@ export default function ImageToken(props: any) {
 					}
 				);
 				const { hash } = await response.json();
+				console.log("hash on server : ", hash)
+				console.log("downloaded hash : ", currentHash)
 				if (hash != currentHash) {
 					download = true;
 				}
 			}
 
 			if (download) {
-				await FileSystem.downloadAsync(imageUrl, imageUri, {
+				try {
+					const r = await FileSystem.downloadAsync(imageUrl, imageUri, {
 					headers: {
 						Authorization: `Bearer ${session}`,
 					},
 				});
+				console.log(r)
+				} catch(e) {
+					console.log(e)
+				}
+				
 			}
 
 			setUri(imageUri);
@@ -90,5 +93,11 @@ export default function ImageToken(props: any) {
 		getUriOrDownload().catch(console.error);
 	}, [isLoading]);
 
-	return <Image source={uri} {..._props}></Image>;
+	/*useEffect(() => {
+		if (assets) {
+			setUri(assets[0]);
+		}
+	}, []);*/
+
+	return <Image source={uri} {..._props} />;
 }

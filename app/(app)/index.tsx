@@ -1,17 +1,31 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import {
+	View,
+	Text,
+	TouchableOpacity,
+	StyleSheet,
+	ScrollView,
+} from "react-native";
 import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSession } from "@/auth/ctx";
 import * as Network from "expo-network";
 import { getArticles, updates } from "@/auth/storageArticles";
-import { Link, Redirect } from "expo-router";
+import { Link, Redirect, router } from "expo-router";
+import Card from "@/components/Card";
+import CustomButton from "@/components/CustomButton";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import Menu from "@/components/Menu";
 
 export default function Main() {
 	const { session, isLoading, signOut } = useSession();
-    if(!session) {
-        return <Redirect href="(auth)/sign-in" />;
-    }
+	if (!session) {
+		return <Redirect href="(auth)/sign-in" />;
+	}
 	const [cards, setCards]: any[] = useState([]);
+    const [posX, setPosX] = useState<Number>(0)
+    const [posY, setPosY] = useState<Number>(0)
+    const [show, setShow] = useState<Number>(0)
+    const [token, setToken] = useState<string>("")
 	const [isInternet, setIsInternet] = useState(false);
 	const loadArticles = async () => {
 		if (isLoading) return;
@@ -19,12 +33,11 @@ export default function Main() {
 		const netState = await Network.getNetworkStateAsync();
 		if (netState.isInternetReachable) {
 			setIsInternet(true);
-			const articles = await updates(session);
-			setCards(articles);
+			const items = await updates(session);
+			setCards(items);
 		} else {
 			setIsInternet(false);
-			const articles = await getArticles(session);
-			setCards(articles);
+			const items = await getArticles(session);
 		}
 	};
 
@@ -33,12 +46,49 @@ export default function Main() {
 	}, [isLoading]);
 
 	return (
-		<SafeAreaView>
-            {isInternet ? <Text></Text> : <Text>There is no internet</Text>}
-			<TouchableOpacity onPress={signOut}>
-				<Text>Logout</Text>
-                <Link href="(app)/add-item"><Text>Add item</Text></Link>
-			</TouchableOpacity>
+		<SafeAreaView style={styles.screen}>
+			<View style={styles.container}>
+				{isInternet ? <Text></Text> : <Text>There is no internet</Text>}
+                <CustomButton onPress={signOut}>Logout</CustomButton>
+				<View>
+					{cards.map((props, key) => {
+						return <Card key={key} {...props} setPosX={setPosX} setPosY={setPosY} menuShow={show} menuToken={token} setShow={setShow} setToken={setToken} />;
+					})}
+                    <Menu posX={posX} posY={posY} token={token} show={show}  />
+					
+				</View>
+				<TouchableOpacity
+					style={{
+						position: "absolute",
+						bottom: 10,
+						right: 10,
+                        padding: 15,
+                        backgroundColor: "#4b4b4b",
+                        borderRadius: 100
+					}}
+                    onPress={() => {
+                        router.navigate('(app)/add-item')
+                    }}
+				>
+					<FontAwesome6 name="add" size={24} color="white" />
+				</TouchableOpacity>
+			</View>
 		</SafeAreaView>
 	);
 }
+
+const styles = StyleSheet.create({
+	screen: {
+		backgroundColor: "blue",
+		height: "100%",
+		width: "100%",
+	},
+	container: {
+		backgroundColor: "white",
+		height: "100%",
+		width: "100%",
+		paddingHorizontal: 20,
+		paddingTop: 10,
+		position: "relative",
+	},
+});

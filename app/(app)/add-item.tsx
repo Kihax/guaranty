@@ -7,6 +7,8 @@ import { useSession } from "../../auth/ctx";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { Image } from "expo-image";
+import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 /**
  * Constantes
@@ -19,6 +21,11 @@ const addItem = () => {
 	const [objectPicture, setObjectPicture] = useState(null); // picture of the object
 	const { session, isLoading, signIn, signInWithGoogleReq } = useSession();
 	const router = useRouter();
+	const [errorTicketPicture, setErrorTicketPicture] = useState<string>("");
+	const [errorObjectName, setErrorObjectName] = useState<string>("");
+	const [date, setDate] = useState(new Date(Date.now()));
+	const [mode, setMode] = useState("date");
+	const [show, setShow] = useState(false);
 
 	const pickImage = async (setImage: any) => {
 		// No permissions request is necessary for launching the image library
@@ -46,23 +53,67 @@ const addItem = () => {
 
 	const send = async () => {
 		let formData = new FormData();
-		//formData.append("name", name);
-		console.log(imageToFormData(ticketPicture));
+		formData.append("objectName", objectName);
+        
 		formData.append("ticketPicture", imageToFormData(ticketPicture));
-		formData.append("objectPicture", imageToFormData(objectPicture));
-		formData.append("guarantyDuration", "6");
+        if(objectPicture) {
+            formData.append("objectPicture", imageToFormData(objectPicture));
+        }
+		formData.append("expiresAt", date.toLocaleDateString('fr-FR'));
+        console.log(date.getTime())
+		try {
+			const response = await fetch(`${URL_API_ITEMS}/send`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "multipart/form-data",
+					Authorization: `Bearer ${session}`,
+				},
+				body: formData,
+			});
+            console.log(response)
+			const res = await response.json();
+			console.log(res);
+			if (!res.error) {
+				router.replace("/");
+			}
+		} catch (e) {
+			console.error(e);
+		}
+	};
 
-		const response = await fetch(`${URL_API_ITEMS}/send`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "multipart/form-data",
-				Authorization: `Bearer ${session}`,
-			},
-			body: formData,
-		});
-		const res = await response.json();
-		if (!res.error) {
-			router.replace("/");
+	const onChange = (event, selectedDate) => {
+		const currentDate = selectedDate;
+		setShow(false);
+		setDate(currentDate);
+	};
+
+	const showMode = (currentMode) => {
+		setShow(true);
+		setMode(currentMode);
+	};
+
+	const showDatepicker = () => {
+		showMode("date");
+	};
+
+	const submit = async () => {
+		if (!ticketPicture) {
+			setErrorTicketPicture("Ticket picture is required");
+		} else {
+			setErrorTicketPicture("");
+		}
+
+		if (objectName.length < 3 || objectName.length > 64) {
+			setErrorObjectName("Object name should be between 3 and 64 chars");
+		} else {
+			setErrorObjectName("");
+		}
+
+		if (
+			ticketPicture &&
+			!(objectName.length < 3 || objectName.length > 64)
+		) {
+			await send();
 		}
 	};
 
@@ -70,7 +121,7 @@ const addItem = () => {
 		<SafeAreaView style={styles.screen}>
 			<View style={styles.container}>
 				<Text style={styles.title}>Add Item</Text>
-                <View
+				<View
 					style={{
 						display: "flex",
 						justifyContent: "center",
@@ -85,13 +136,19 @@ const addItem = () => {
 					)}
 				</View>
 				<CustomButton
+					styleButton={{
+						backgroundColor: "#f4f4f4",
+					}}
+					styleText={{
+						color: "black",
+					}}
 					onPress={() => {
 						pickImage(setTicketPicture);
 					}}
 				>
 					Ticket picture
 				</CustomButton>
-				
+				<Text style={styles.errorText}>{errorTicketPicture}</Text>
 
 				<CustomTextInput
 					label="Name of the objet"
@@ -100,8 +157,9 @@ const addItem = () => {
 					}}
 					value={objectName}
 				/>
+				<Text style={styles.errorText}>{errorObjectName}</Text>
 
-                <View
+				<View
 					style={{
 						display: "flex",
 						justifyContent: "center",
@@ -116,12 +174,39 @@ const addItem = () => {
 					)}
 				</View>
 				<CustomButton
+					styleButton={{
+						backgroundColor: "#f4f4f4",
+					}}
+					styleText={{
+						color: "black",
+					}}
 					onPress={() => {
 						pickImage(setObjectPicture);
 					}}
 				>
 					Object picture
 				</CustomButton>
+				<CustomButton
+					styleButton={{
+						backgroundColor: "#f4f4f4",
+					}}
+					styleText={{
+						color: "black",
+					}}
+					onPress={showDatepicker}
+				>
+					Expires At : {date.toLocaleDateString("fr-FR")}
+				</CustomButton>
+				{show && (
+					<DateTimePicker
+						testID="dateTimePicker"
+						value={date}
+						mode={mode}
+						onChange={onChange}
+						minimumDate={Date.now()}
+					/>
+				)}
+				<CustomButton onPress={submit}>Submit</CustomButton>
 			</View>
 		</SafeAreaView>
 	);
@@ -156,6 +241,9 @@ const styles = StyleSheet.create({
 	image: {
 		width: 200,
 		height: 200,
+	},
+	errorText: {
+		color: "red",
 	},
 });
 

@@ -10,8 +10,8 @@ import React from "react";
 const CustomButton = (props: any) => {
 	return (
 		<View>
-			<TouchableOpacity style={styles.button} {...props}>
-				<Text style={styles.text}>{props?.children}</Text>
+			<TouchableOpacity style={[styles.button, props?.styleButton]} {...props}>
+				<Text style={[styles.text, props?.styleText]}>{props?.children}</Text>
 			</TouchableOpacity>
 		</View>
 	);
