@@ -75,15 +75,6 @@ export default function SignIn() {
 			});
 		}
 
-		/*const valid = await signIn(email, password);
-
-		console.log("valid : ", valid);
-
-		if (!valid) {
-			console.log("not valid");
-			return setError("Doesn't find any account for this email/password");
-		}*/
-
 		return;
 	};
 

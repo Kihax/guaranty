@@ -23,7 +23,10 @@ const addItem = () => {
 	const router = useRouter();
 	const [errorTicketPicture, setErrorTicketPicture] = useState<string>("");
 	const [errorObjectName, setErrorObjectName] = useState<string>("");
-	const [date, setDate] = useState(new Date(Date.now()));
+	let tomorrow = new Date();
+	tomorrow.setDate(tomorrow.getDate() + 1);
+
+	const [date, setDate] = useState(tomorrow);
 	const [mode, setMode] = useState("date");
 	const [show, setShow] = useState(false);
 
@@ -54,13 +57,12 @@ const addItem = () => {
 	const send = async () => {
 		let formData = new FormData();
 		formData.append("objectName", objectName);
-        
+
 		formData.append("ticketPicture", imageToFormData(ticketPicture));
-        if(objectPicture) {
-            formData.append("objectPicture", imageToFormData(objectPicture));
-        }
-		formData.append("expiresAt", date.toLocaleDateString('fr-FR'));
-        console.log(date.getTime())
+		if (objectPicture) {
+			formData.append("objectPicture", imageToFormData(objectPicture));
+		}
+		formData.append("expiresAt", date.toLocaleDateString("fr-FR"));
 		try {
 			const response = await fetch(`${URL_API_ITEMS}/send`, {
 				method: "POST",
@@ -70,7 +72,6 @@ const addItem = () => {
 				},
 				body: formData,
 			});
-            console.log(response)
 			const res = await response.json();
 			console.log(res);
 			if (!res.error) {
@@ -200,10 +201,10 @@ const addItem = () => {
 				{show && (
 					<DateTimePicker
 						testID="dateTimePicker"
-						value={date}
+						value={tomorrow}
 						mode={mode}
 						onChange={onChange}
-						minimumDate={Date.now()}
+						minimumDate={tomorrow}
 					/>
 				)}
 				<CustomButton onPress={submit}>Submit</CustomButton>

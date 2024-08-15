@@ -1,10 +1,33 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import React from "react";
+import { useSession } from "@/auth/ctx";
+
+/**
+ * Constantes
+ */
+const URL_API_ITEMS = `${process.env.EXPO_PUBLIC_BASE_URL}/items`;
 
 const Menu = (props: any) => {
-    if(!props?.show) {
-        return (<></>)
-    }
+	const { session, isLoading, signIn, signInWithGoogleReq } = useSession();
+	if (!props?.show) {
+		return <></>;
+	}
+	const itemDelete = async () => {
+		const { token } = props;
+
+		console.log(`${URL_API_ITEMS}/delete/${token}`);
+		const req = await fetch(`${URL_API_ITEMS}/delete/${token}`, {
+			method: "POST",
+			headers: {
+				Authorization: `Bearer ${session}`,
+			}
+		});
+		const res = req.json();
+		console.log(res);
+		props?.setShow(false);
+		await props?.loadArticles();
+	};
+	const editItem = () => {};
 	return (
 		<View
 			style={{
@@ -23,11 +46,15 @@ const Menu = (props: any) => {
 					paddingVertical: 10,
 					paddingHorizontal: 10,
 				}}
-				onPress={() => console.log("hello world")}
+				onPress={editItem}
 			>
-				<Text style={{
-					color: "white"
-				}}>Edit</Text>
+				<Text
+					style={{
+						color: "white",
+					}}
+				>
+					Edit
+				</Text>
 			</TouchableOpacity>
 			<TouchableOpacity
 				style={{
@@ -35,7 +62,7 @@ const Menu = (props: any) => {
 					paddingHorizontal: 10,
 					backgroundColor: "rgba(255, 0, 0, 0.2)",
 				}}
-				onPress={() => console.log("delete")}
+				onPress={itemDelete}
 			>
 				<Text
 					style={{

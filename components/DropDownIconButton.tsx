@@ -22,13 +22,6 @@ const DropDownIconButton = (props) => {
 						props?.setPosX(pgX - 160);
 						props?.setPosY(pgY - 70);
 					});
-					/*console.log("height:", layout.height);
-					console.log("width:", layout.width);
-					console.log("x:", layout.x);
-					console.log("y:", layout.y);*/
-				}}
-				onLayout={(e) => {
-					console.log("layout");
 				}}
 			>
 				<Entypo name="dots-three-vertical" size={18} color="black" />

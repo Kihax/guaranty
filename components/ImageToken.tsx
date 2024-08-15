@@ -62,8 +62,6 @@ export default function ImageToken(props: any) {
 					}
 				);
 				const { hash } = await response.json();
-				console.log("hash on server : ", hash)
-				console.log("downloaded hash : ", currentHash)
 				if (hash != currentHash) {
 					download = true;
 				}
@@ -76,7 +74,6 @@ export default function ImageToken(props: any) {
 						Authorization: `Bearer ${session}`,
 					},
 				});
-				console.log(r)
 				} catch(e) {
 					console.log(e)
 				}

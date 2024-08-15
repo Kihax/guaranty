@@ -52,17 +52,6 @@ const Card = (props) => {
 					<Text>{date.toLocaleDateString("fr-FR")}</Text>
 				</View>
 			</View>
-			<View>
-				<DropDownIconButton
-					menuShow={props?.menuShow}
-					menuToken={props?.menuToken}
-					setPosX={props?.setPosX}
-					setPosY={props?.setPosY}
-					setToken={props?.setToken}
-					setShow={props?.setShow}
-					token={props?.token}
-				/>
-			</View>
 		</TouchableOpacity>
 	);
 };

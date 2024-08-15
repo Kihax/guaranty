@@ -3,7 +3,7 @@ import * as Network from "expo-network";
 
 /**
  * 
- * constante
+ * constantes
  */
 const articlesDir = FileSystem.cacheDirectory + "items/";
 const articlesFile = articlesDir + "items";

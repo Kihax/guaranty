@@ -53,9 +53,7 @@ export default function Main() {
 				<View>
 					{cards.map((props, key) => {
 						return <Card key={key} {...props} setPosX={setPosX} setPosY={setPosY} menuShow={show} menuToken={token} setShow={setShow} setToken={setToken} />;
-					})}
-                    <Menu posX={posX} posY={posY} token={token} show={show}  />
-					
+					})}					
 				</View>
 				<TouchableOpacity
 					style={{

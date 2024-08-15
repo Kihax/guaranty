@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
+    "@openspacelabs/react-native-zoomable-view": "^2.1.6",
     "@react-native-community/datetimepicker": "^8.2.0",
     "@react-native-google-signin/google-signin": "^12.2.1",
     "@react-navigation/native": "^6.0.2",

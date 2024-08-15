@@ -111,8 +111,8 @@ export function SessionProvider(props: React.PropsWithChildren) {
 		const res = await response.json();
 		if (res?.token) {
 			setSession(res.token.token);
-			router.replace("./(app)");
-			return {};
+			
+			return router.replace("/");
 		} else {
 			return {
 				error: "an error occured",
@@ -132,7 +132,6 @@ export function SessionProvider(props: React.PropsWithChildren) {
 			}
 		);
 		const res = await response.json();
-		console.log("response : ", res)
 		if (res?.token) {
 			if (res?.code == 2) {
 				return router.replace({
